@@ -15,8 +15,6 @@ session_start();
 
 // Instantiate the app
 $settings = require __DIR__ . '/../src/settings.php';
-$facebookSettings = require __DIR__ . '/../src/facebook-settings.php';
-$settings = array_merge($settings, $facebookSettings);
 $app = new \Slim\App($settings);
 
 // Set up dependencies
@@ -28,8 +26,6 @@ require __DIR__ . '/../src/middleware.php';
 // Register routes
 require __DIR__ . '/../src/routes.php';
 
-// Register database
-require __DIR__ . '/../generated-conf/config.php';
 
 // Run app
 $app->run();

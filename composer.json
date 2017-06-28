@@ -22,11 +22,11 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/",
             "App\\": "src/",
-            "App\\Models\\": "src/models/",
-            "App\\Models\\Base\\": "src/models/Base",
-            "App\\Models\\Map\\": "src/models/Map"
+            "App\\Routes\\": "src/routes/",
+            "App\\Database\\": "src/database/",
+            "App\\Database\\Models\\": "src/database/models/",
+            "App\\Database\\Managers\\": "src/database/managers/"
         }
     },
 	"scripts": {
