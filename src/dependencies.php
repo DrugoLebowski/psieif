@@ -30,10 +30,10 @@ $container['db'] = function ($c) {
     );
 };
 
-$container[\App\Database\Managers\UsersManager::class] = function ($c) {
+$container['usersManager'] = function ($c) {
     return new App\Database\Managers\UsersManager($c);
 };
 
-$container[\App\Database\Managers\PostsManager::class] = function ($c) {
+$container['postsManager'] = function ($c) {
     return new App\Database\Managers\PostsManager($c);
 };
