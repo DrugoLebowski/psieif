@@ -1,6 +1,12 @@
 /vendor/
 /logs/*
 !/logs/README.md
+README.md
+propel.xml
+generated-conf/config.php
 
 <!-- Idea -->
 .idea
+
+<!-- Vagrant -->
+.vagrant

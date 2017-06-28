@@ -1,0 +1,18 @@
+---
+memory: 1024
+cpus: 2
+
+networking:
+    - public: false
+
+# PHP options: 5 (uses 5.6) or 7
+php: 7
+
+# Uses nginx + PHP-FPM. If set to false, uses Apache.
+nginx: true
+
+# ports:
+#     - guest: 80
+#       host: 8000
+
+
