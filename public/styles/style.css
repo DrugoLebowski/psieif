@@ -1,0 +1,32 @@
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.form-header {
+    height: 75px;
+    margin-bottom: 50px;
+    padding: 20px;
+}
+
+.form-header img {
+    height: 100px;
+}
+
+.form-header > .h1Container {
+    height: inherit;
+    margin-top: 25px;
+}
+
+.form-header > .h1Container > h1 {
+    vertical-align: middle;
+    display: inline-block;
+    margin: 0;
+}
+
+.vertical-align {
+    display: flex;
+    align-items: center;
+}

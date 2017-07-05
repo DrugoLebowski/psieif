@@ -26,8 +26,10 @@ class Users
     /** @var string */
     private $email;
 
-    /** @var string */
-    private $accessToken;
+    public function __construct()
+    {
+
+    }
 
     /**
      * @return mixed
@@ -116,24 +118,6 @@ class Users
     public function setEmail($email)
     {
         $this->email = $email;
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getAccessToken()
-    {
-        return $this->accessToken;
-    }
-
-    /**
-     * @param mixed $accessToken
-     * @return Users
-     */
-    public function setAccessToken($accessToken)
-    {
-        $this->accessToken = $accessToken;
         return $this;
     }
 

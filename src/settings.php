@@ -27,8 +27,8 @@ return [
 
         // Facebook app settings
         'facebook'  => [
-            'app-id'        => '',
-            'secret-key'    => ''
+            'appId'        => '1536013056471626',
+            'appSecret'    => '94f915f27c720ae3c8932d1d6470e23a'
         ]
     ],
 ];
