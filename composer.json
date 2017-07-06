@@ -17,7 +17,7 @@
         "slim/php-view": "^2.0",
         "monolog/monolog": "^1.17",
         "facebook/graph-sdk": "^5.5",
-        "league/uri": "^5.0",
+        "league/uri": "^4.2",
         "slim/twig-view": "^2.2"
     },
     "require-dev": {

@@ -24,7 +24,7 @@ class FBCaller
      * @param   string  $appId
      * @param   string  $appSecret
      */
-    public function __construct(string $appId, string $appSecret)
+    public function __construct($appId, $appSecret)
     {
         $this->setFb(new Facebook([
             'app_id'                => $appId,
@@ -43,8 +43,8 @@ class FBCaller
      * @return  null|array  If there are not errors returns an array with
      *                      the extracted attributes, null otherwise.
      */
-    public function get(string $endpoint, array $arguments, array $data,
-        string $accessToken = null)
+    public function get( $endpoint, array $arguments, array $data,
+         $accessToken = null)
     {
         foreach ($arguments as $argument) {
             $endpoint = str_replace('{}', $argument, $endpoint);
@@ -73,7 +73,7 @@ class FBCaller
      * @param   string  $accessToken
      * @return  bool    Returns true if the session is valid, false otherwise.
      */
-    public function validSession($accessToken): bool
+    public function validSession($accessToken)
     {
         $response = $this->get('/me', [], ['id'], $accessToken);
         return !is_null($response) && !key_exists('error', $response);
@@ -86,7 +86,7 @@ class FBCaller
      * @param   array   $data
      * @return  array   The filtered response through the $data array.
      */
-    private function parseResponse(array $response, array $data): array
+    private function parseResponse(array $response, array $data)
     {
         $filteredResponse = array();
 
