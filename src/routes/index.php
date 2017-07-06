@@ -8,12 +8,7 @@ use Psr\Http\Message\ResponseInterface;
 
 $app->get('/', function (ServerRequestInterface $request, ResponseInterface $response, array $args) {
     $this->logger->info("Facebook Psieif '/' route");
-    $accessToken = $request->getCookieParams()['at'];
-
-    if ($this->fb->validSession($accessToken)) {
-        return $response->withStatus(400)
-            ->withHeader('Location','/hash');
-    }
+    
 
     // Render index view
     return $this->view->render($response, 'pages/welcome.twig', $args);
