@@ -4,6 +4,7 @@
 README.md
 propel.xml
 generated-conf/config.php
+/cache
 
 <!-- Idea -->
 .idea

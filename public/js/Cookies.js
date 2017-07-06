@@ -1,3 +1,4 @@
+// Manages the cookies read and write operations
 var Cookies = {
     createCookie: function (name, value, days) {
         var expires = "";

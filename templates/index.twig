@@ -27,6 +27,29 @@
                 </div><!-- /.modal-content -->
             </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
+
+        <div id="modal-login" class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal-login" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="modal-login-title">Login</h4>
+                    </div>
+                    <div class="modal-body text-center">
+                        <p>
+                            Processors view from advices like photonic kahlesses.
+                        </p>
+                        <p>
+                            <div id="fb-login-button" class="fb-login-button" data-max-rows="1"
+                                 data-size="large" data-button-type="continue_with"
+                                 data-show-faces="false" data-auto-logout-link="false"
+                                 data-use-continue-as="false" onlogin="Facebook.checkLoginState();" scope="email">
+                            </div>
+                        </p>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
         {% block content %}
             There's an error!
         {% endblock content %}

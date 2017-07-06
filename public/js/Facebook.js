@@ -7,7 +7,7 @@ var Facebook = {
                 && response.authResponse.accessToken !== null
                 && response.authResponse.userID !== null) {
                 Cookies.createCookie('at', response.authResponse.accessToken, 0.08333333333);
-                window.location.href = '/hash'
+                $('#modal-login').modal('hide');
             } else {
                 console.log(response.status);
                 // TODO: Show a modal error
@@ -37,4 +37,6 @@ window.fbAsyncInit = function () {
         xfbml: true,  // parse social plugins on this page
         version: 'v2.9' // use graph api version 2.8
     });
+
+    Facebook.checkLoginState();
 };

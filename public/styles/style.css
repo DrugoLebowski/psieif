@@ -10,23 +10,24 @@ html, body {
     margin-bottom: 50px;
     padding: 20px;
 }
+    .form-header > .h1Container {
+        height: inherit;
+        margin-top: 25px;
+    }
+        .form-header > .h1Container > h1 {
+            vertical-align: middle;
+            display: inline-block;
+            margin: 0;
+        }
 
-.form-header img {
-    height: 100px;
+/* Panel */
+div#progress {
+    display: none;
 }
-
-.form-header > .h1Container {
-    height: inherit;
-    margin-top: 25px;
-}
-
-.form-header > .h1Container > h1 {
-    vertical-align: middle;
-    display: inline-block;
-    margin: 0;
-}
-
-.vertical-align {
-    display: flex;
-    align-items: center;
+    div > .progress {
+        height: 10px;
+    }
+div#tips {
+    display: none;
+    color: #a94442;
 }
