@@ -1,5 +1,4 @@
-(function () {
-
+$(document).ready(function () {
     /**
      * ################ DECLARING COMPONENTS ################
      */
@@ -29,7 +28,7 @@
 
         // Contains the endpoints of the app
         var Endpoints = {
-            hash: '/hash?XDEBUG_SESSION_START'
+            hash: '/handler.php?XDEBUG_SESSION_START'
         };
 
         var errorHandler = function (e) {
@@ -37,30 +36,32 @@
 
             modalTitle.text('Error!');
             modalButton.addClass('btn-danger');
+            modalButton.text('Ok.');
+            modalButton.on('click', function (e) {
+                modal.modal('hide');
+            });
+
             switch (jResponse.code) {
                 case '@access_token_not_valid_error':
+                    Facebook.checkLoginState();
+                    modalTitle.text('Attention!');
+                    modalButton.addClass('btn-warning');
+                    modalButton.text('Retry');
                     modalContent.text(jResponse.data.message);
-                    modalButton.text('Returns to homepage.');
-                    modal.on('click', function (e) {
-                        location.href = '/';
+                    modalButton.on('click', function (e) {
+                       checkButton.click();
+                       modal.modal('hide');
                     });
                     break;
                 case '@invalid_uri_error':
                 case '@facebook_data_fetching_error':
                 case '@not_a_page_error':
                     modalContent.text(jResponse.data.message);
-                    modalButton.text('Ok.');
-                    modalButton.on('click', function (e) {
-                        modal.modal('hide');
-                    });
                     break;
                 default:
                     modalTitle.text('Unrecognized error!');
                     modalContent.text('It has happened an error that our monkeys cannot recognize.');
                     modalButton.text('mmm \'kay...');
-                    modalButton.on('click', function (e) {
-                        modal.modal('hide');
-                    })
             }
 
             modal.modal('show');
@@ -77,7 +78,7 @@
                 });
 
                 request.done(function (response) {
-                    console.log(JSON.stringify(response));
+                    console.log(JSON.parse(response).data.location);
 
                     // TODO: Manage the response
                 });
@@ -211,7 +212,8 @@
         var link = linkTextinput.val();
 
         // Checks if the Facebook cookie is present
-        if (Cookies.readCookie('fbsr_' + Facebook.appId)) {
+        if (Cookies.readCookie('fbsr_' + Facebook.appId) &&
+            Cookies.readCookie('at')) {
             // Checks if the facebook link is valid
             if (!Validator.isFacebookUrlValid(link)) {
                 modalTitle.text('Warning!');

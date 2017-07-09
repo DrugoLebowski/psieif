@@ -11,3 +11,6 @@ generated-conf/config.php
 
 <!-- Vagrant -->
 .vagrant
+Vagrantfile
+config.yaml
+setup.rb

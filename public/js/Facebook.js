@@ -8,9 +8,11 @@ var Facebook = {
                 && response.authResponse.userID !== null) {
                 Cookies.createCookie('at', response.authResponse.accessToken, 0.08333333333);
                 $('#modal-login').modal('hide');
-            } else {
-                console.log(response.status);
+            } else if (response.status === "not_authorized") {
+                console.log("Not authorized");
                 // TODO: Show a modal error
+            } else {
+                console.log("Unknown");
             }
         });
     }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Database;
+namespace App\Components;
 
 use PDO;
 use Monolog\Logger;
@@ -28,9 +28,6 @@ class Database
     /** @var string */
     private $password;
 
-    /** @var \Monolog\Logger */
-    private $logger;
-
     /**
      * Database constructor.
      *
@@ -42,7 +39,7 @@ class Database
      *
      * @throws  \Exception
      */
-    public function __construct($host = "localhost", $port = "3306", $dbname, $username, $password, $logger)
+    public function __construct($host, $port, $dbname, $username, $password)
     {
         if (is_null($dbname) || empty($dbname)) {
             throw new \Exception('The database name is required');
@@ -61,7 +58,6 @@ class Database
         $this->setDbname($dbname);
         $this->setUsername($username);
         $this->setPassword($password);
-        $this->setLogger($logger);
     }
 
     /**
@@ -76,16 +72,15 @@ class Database
         try {
             return new PDO(
                 'mysql:' .
-                'host='     . $this->getHost() . ':' .
-                'port='     . $this->getPort() . ':' .
-                'dbname='   . $this->getDbname() . ':',
+                'host='     . $this->getHost() . ';' .
+                'port='     . $this->getPort() . ';' .
+                'dbname='   . $this->getDbname() . ';' .
+                'charset=utf8mb4',
                 $this->getUsername(),
                 $this->getPassword()
             );
         } catch (\Exception $e) {
-            $this->getLogger()->addError($e->getMessage());
-        } finally {
-            return null;
+            exit($e->getMessage());
         }
     }
 
@@ -167,22 +162,6 @@ class Database
     public function setPassword($password)
     {
         $this->password = $password;
-    }
-
-    /**
-     * @return Logger
-     */
-    public function getLogger()
-    {
-        return $this->logger;
-    }
-
-    /**
-     * @param Logger $logger
-     */
-    public function setLogger($logger)
-    {
-        $this->logger = $logger;
     }
 
 }
