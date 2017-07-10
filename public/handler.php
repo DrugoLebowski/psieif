@@ -39,27 +39,7 @@ $accessToken    = $_COOKIE['at'];
 $resourceLink   = $_POST['link'];
 
 // Checks if the session is valid
-try {
-    $session = $fb->get('/me', $accessToken)->getDecodedBody();
-} catch(FacebookResponseException $fre) {
-    http_response_code(500);
-    exit(json_encode([
-        'status'    => 'ERROR',
-        'code'      => '@fb_response_error',
-        'data'      => [
-            'message'   => $fre->getMessage()
-        ]
-    ]));
-} catch(FacebookSDKException $fsde) {
-    http_response_code(500);
-    exit(json_encode([
-        'status'    => 'ERROR',
-        'code'      => '@fb_sdk_error',
-        'data'      => [
-            'message'   => $fsde->getMessage()
-        ]
-    ]));
-}
+$session = Util::makeFBRequest($fb, '/me', $accessToken);
 
 if (empty($session['error'])) {
     if (Util::validateFBUrl($resourceLink)) {
@@ -90,29 +70,8 @@ if (empty($session['error'])) {
                 $entityFBLink = 'https://www.facebook.com/'.$pathSegments[0];
                 $postId       = empty($pathSegments[3]) ?
                     $pathSegments[2] : $pathSegments[3];
-
-                try {
-                    $pageId = $fb->get('/?id='.$entityFBLink,
-                        $accessToken)->getDecodedBody()['id'];
-                } catch(FacebookResponseException $fre) {
-                    http_response_code(500);
-                    exit(json_encode([
-                        'status'    => 'ERROR',
-                        'code'      => '@fb_response_error',
-                        'data'      => [
-                            'message'   => $fre->getMessage()
-                        ]
-                    ]));
-                } catch(FacebookSDKException $fsde) {
-                    http_response_code(500);
-                    exit(json_encode([
-                        'status' => 'ERROR',
-                        'code' => '@fb_sdk_error',
-                        'data' => [
-                            'message' => $fsde->getMessage()
-                        ]
-                    ]));
-                }
+                $pageId = Util::makeFBRequest($fb, '/?id='.$entityFBLink,
+                    $accessToken)['id'];
                 break;
             case Util::PERMALINK:
                 $query = new Query($uri->getQuery());
@@ -123,31 +82,10 @@ if (empty($session['error'])) {
 
         // Retrieve the data associated to the facebook resource
         $resourceId = $pageId.'_'.$postId;
-        try {
-            $response = $fb->get(
-                '/'.$resourceId.'?fields=attachments,source,comments.limit(10000000){likes,attachment,comments.limit(10000000){attachment,message,from},from,message}',
-                $accessToken
-            );
-            $data = $response->getDecodedBody();
-        } catch(FacebookResponseException $fre) {
-            http_response_code(500);
-            exit(json_encode([
-                'status'    => 'ERROR',
-                'code'      => '@fb_response_error',
-                'data'      => [
-                    'message'   => $fre->getMessage()
-                ]
-            ]));
-        } catch(FacebookSDKException $fsde) {
-            http_response_code(500);
-            exit(json_encode([
-                'status' => 'ERROR',
-                'code' => '@fb_sdk_error',
-                'data' => [
-                    'message' => $fsde->getMessage()
-                ]
-            ]));
-        }
+        $data = Util::makeFBRequest($fb,
+            '/'.$resourceId.'?fields=attachments,source,comments.limit(10000000){likes,attachment,comments.limit(10000000){attachment,message,from},from,message}',
+            $accessToken
+        );
 
         // If there are not error, then manipulate and save the facebook response
         if (empty($data['error'])) {
@@ -160,6 +98,7 @@ if (empty($session['error'])) {
             $version = count(glob($baseTmpPath.$resourceId.'*')) + 1;
             $resourceDir  = $resourceId.'-'.$version;
             $tmpSavePath  = $baseTmpPath.$resourceDir;
+            $tmpSaveOutPath = $tmpSavePath.'/output';
             mkdir($tmpSavePath, 0755); // The file will be saved
 
             // Saves the attachments, if it exists in the downloaded resource
@@ -194,9 +133,16 @@ if (empty($session['error'])) {
             file_put_contents($tmpSavePath.'/data.json',
                 serialize(json_encode($parsedData)));
 
-            // Makes hash (the footprint) of the post
-            $hash = hash('sha256', json_encode($parsedData));
-            file_put_contents($tmpSavePath.'/'.$hash, "");
+
+            // Makes hash (the footprint) of the post's zip
+            mkdir($tmpSaveOutPath, 0755);
+            $zipName = Util::makeDirZip($resourceDir, $tmpSavePath,
+                $tmpSaveOutPath);
+            $hash = hash_file('sha256',
+                $tmpSaveOutPath.'/'.$zipName);
+            file_put_contents($tmpSaveOutPath.'/'.$hash, "");
+            $zipName = Util::makeDirZip($hash, $tmpSaveOutPath.'/',
+                $baseSavingPath);
 
             // Checks if the hash already exists in the DB
             $query = $dbInstance->prepare(
@@ -210,42 +156,6 @@ if (empty($session['error'])) {
                 $zipName = $rows[0]['name'];
                 $zipPath = $baseSavingPath.'/'.$zipName;
             } else {
-                // Makes the zip of the current version of the post and
-                // saves it to the ../hashes/ dir
-                $zip     = new ZipArchive();
-                $zipName = $hash.'.zip';
-                $zipPath = $baseSavingPath.'/'.$zipName;
-
-                // In case the zip file creation is not possible
-                if ($zip->open($zipPath, ZipArchive::CREATE) !== true) {
-                    http_response_code(500);
-                    exit(json_encode([
-                        'status'    => 'ERROR',
-                        'code'      => '@zip_creation_error',
-                        'data'      => [
-                            'message'   => 'It was not possible to create the zip file.'
-                        ]
-                    ]));
-                }
-
-                // Iterator to iterate
-                $files = new RecursiveIteratorIterator(
-                    new RecursiveDirectoryIterator(realpath($tmpSavePath)),
-                    RecursiveIteratorIterator::LEAVES_ONLY
-                );
-
-                foreach ($files as $name => $file) {
-                    if (!$file->isDir()) {
-                        // Get real and relative path for current file
-                        $filePath = $file->getRealPath();
-                        $relativePath = substr($filePath, strlen(realpath($tmpSavePath)) + 1);
-
-                        // Add current file to archive
-                        $zip->addFile($filePath, $relativePath);
-                    }
-                }
-                $zip->close();
-
                 // Now saves the post hash to the database
                 $query = $dbInstance->prepare(
                     'INSERT INTO posts(name, hash, date)'.
