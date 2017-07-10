@@ -160,7 +160,7 @@ $(document).ready(function () {
 
     // Manages the validation of this app
     var Validator = (function () {
-        var pattern = /^((https|http):\/\/)\n?((www|m|mbasic)\.facebook\.com)(\/((([a-zA-Z0-9.]+)(\/(((posts|videos)\/\d{1,})|((photos){1}\/a\.\d{1,}\.\d{1,}\/\d{1,}))))|(photo\.php)|(permalink\.php\?story_fbid=\d{1,}&id=\d{1,})))/;
+        var pattern = /^((https|http):\/\/)\n?((www|m|mbasic)\.facebook\.com)(\/((([a-zA-Z0-9.]+)(\/(((posts|videos)\/\d{1,})|((photos){1}\/a\.\d{1,}\.\d{1,}\.\d{1,}\/\d{1,}))))|(photo\.php)|(permalink\.php\?story_fbid=\d{1,}&id=\d{1,})))/;
 
         return {
             isFacebookUrlValid: function (url) {

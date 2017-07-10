@@ -25,7 +25,7 @@ class Util
         $pattern =
             '/^((https|http):\/\/)\n?((www|m|mbasic)\.facebook\.com)'.
             '(\/((([a-zA-Z0-9.]+)(\/(((posts|videos)\/\d{1,})|'.
-            '((photos){1}\/a\.\d{1,}\.\d{1,}\/\d{1,}))))|'.
+            '((photos){1}\/a\.\d{1,}\.\d{1,}\.\d{1,}\/\d{1,}))))|'.
             /*'(photo\.php)|*/'(permalink\.php\?story_fbid=\d{1,}&id=\d{1,})))/';
 
         return preg_match($pattern, $url);
@@ -38,7 +38,7 @@ class Util
         } else if (preg_match('/\/[a-zA-Z0-9.]+\/videos\/\d{1,}/', $url)) {
             return Util::VIDEO;
         } else if(preg_match(
-            '/^\/[a-zA-Z0-9.]+\/(photos){1}\/a\.\d{1,}\.\d{1,}\/\d{1,}/',
+            '/^\/[a-zA-Z0-9.]+\/(photos){1}\/a\.\d{1,}\.\d{1,}\.\d{1,}\/\d{1,}/',
             $url)) {
             return Util::PAGE_PHOTO;
         } else if(preg_match('/^\/photo\.php/', $url)) {
