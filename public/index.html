@@ -58,20 +58,25 @@
             </div>
             <div class="row">
                 <div class="col-sm-12 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3">
+                    <ul class="nav nav-tabs nav-custom" role="tablist">
+                        <li role="presentation" class="col-lg-6 text-center active">
+                            <a href="#hasher" aria-controls="hasher" role="tab" data-toggle="tab">Hash a post</a>
+                        </li>
+                        <li role="presentation" class="col-lg-6 text-center">
+                            <a href="#validate" aria-controls="validate" role="tab" data-toggle="tab">Validate a post</a>
+                        </li>
+                    </ul>
                     <div id="panel" class="panel panel-default">
-                        <div class="panel-heading">
-                            What content do you want hash?
-                        </div>
-                        <div class="panel-body">
-                            <div class="container-fluid">
+                        <div class="panel-body tab-content">
+                            <div id="hasher" role="tabpanel" class="container-fluid tab-pane fade active in">
                                 <div class="form-group has-feedback">
-                                    <label class="control-label" for="link">Facebook post link</label>
+                                    <label class="control-label" for="link">URL to resource</label>
                                     <div class="input-group">
-                                    <span class="input-group-btn">
-                                        <button id="check" class="btn btn-default" type="button">Hash!</button>
-                                    </span>
+                                        <span class="input-group-btn">
+                                            <button id="checkBtn" class="btn btn-default" type="button">Hash!</button>
+                                        </span>
                                         <input id="link" type="text" class="form-control"
-                                               placeholder="Facebook post link" required>
+                                               placeholder="URL to resource" required>
                                         <span id="linkIcon" class="glyphicon form-control-feedback"></span>
                                     </div>
                                 </div>
@@ -91,6 +96,33 @@
                                             <span class="sr-only">60% Complete</span>
                                         </div>
                                     </div>
+                                </div>
+                                <div id="result" class="list-group" style="display: none;">
+                                    <a class="list-group-item break-word active">Result</a>
+                                    <a class="list-group-item">Creation date: <span id="result_creation-date"></span></a>
+                                    <a class="list-group-item break-word">Owner: <span id="result_owner"></span></a>
+                                    <a class="list-group-item">Code: <span id="result_code"></span></a>
+                                    <a class="list-group-item break-word">Sha-256 Hash: <span id="result_hash"></span></a>
+                                    <a href="#" target="_blank" class="list-group-item active button" id="result_download">
+                                        <h4 class="text-center no-margin">Download!</h4>
+                                    </a>
+                                </div>
+                            </div>
+                            <div id="validate" role="tabpanel" class="container-fluid tab-pane fade">
+                                <div class="form-group has-feedback">
+                                    <label class="control-label" for="code">Code of the resource</label>
+                                    <input id="code" type="text" class="form-control"
+                                           placeholder="Code of the resource" required>
+                                    <span class="glyphicon form-control-feedback"></span>
+                                </div>
+                                <div class="form-group has-feedback">
+                                    <label class="control-label" for="hash">Hash of the resource</label>
+                                    <input id="hash" type="text" class="form-control"
+                                           placeholder="Hash of the resource" required />
+                                    <span class="glyphicon form-control-feedback"></span>
+                                </div>
+                                <div class="form-group">
+                                    <button id="validateBtn" class="btn btn-primary btn-large">Check!</button>
                                 </div>
                             </div>
                         </div>

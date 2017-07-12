@@ -13,11 +13,16 @@ $(document).ready(function () {
     var modalLogin      = $('#modal-login');
 
     var panel           = $('#panel');
-    var checkButton     = $('button#check');
-    var linkTextinput   = $('input#link');
-    var hashFormGroup   = $('div.form-group');
+    var checkButton     = $('button#checkBtn');
+    var validateButton  = $('button#validateBtn');
+    var linkTextInput   = $('input#link');
+    var codeTextInput   = $('input#code');
+    var hashTextInput   = $('input#hash');
+    var hashFormGroup   = $('div#hasher > .form-group');
+    var validateFormGroup = $('div#validate > .form-group');
     var linkIconSpan    = $('span#linkIcon');
     var tipsDiv         = $('div#tips');
+    var hasherResultDiv = $('div#result');
 
     /**
      * ################ DECLARING MODULES ################
@@ -28,7 +33,8 @@ $(document).ready(function () {
 
         // Contains the endpoints of the app
         var Endpoints = {
-            hash: '/handler.php?XDEBUG_SESSION_START'
+            hash:       '/handler.php?XDEBUG_SESSION_START',
+            validate:   '/validate.php?XDEBUG_SESSION_START'
         };
 
         var errorHandler = function (e) {
@@ -72,15 +78,52 @@ $(document).ready(function () {
                 var request = $.ajax({
                     url: Endpoints.hash,
                     method: 'post',
+                    timeout: 360000,
                     data: {
                         link: link
                     }
                 });
 
                 request.done(function (response) {
-                    console.log(JSON.parse(response).data.location);
+                    var parsedRes   = JSON.parse(response),
+                        resultOwner = $('#result_owner'),
+                        resultDate  = $('#result_creation-date'),
+                        resultCode  = $('#result_code'),
+                        resultHash  = $('#result_hash'),
+                        resultBut   = $('#result_download');
 
-                    // TODO: Manage the response
+                    resultOwner.text(parsedRes.data.owner);
+                    resultDate.text(parsedRes.data.date);
+                    resultCode.text(parsedRes.data.code);
+                    resultHash.text(parsedRes.data.hash);
+                    resultBut.attr('href', parsedRes.data.location);
+                    hasherResultDiv.show();
+                });
+
+                request.fail(errorHandler);
+            },
+            validateHash: function (code, hash) {
+                var request = $.ajax({
+                    url: Endpoints.validate,
+                    method: 'get',
+                    data: {
+                        code: code,
+                        hash: hash
+                    }
+                });
+
+                request.done(function (response) {
+                    var parsedRes = JSON.parse(response);
+
+                    modalTitle.text("Success!");
+                    modalContent.text(parsedRes.data.message);
+                    modalButton
+                        .text('Close')
+                        .addClass('btn-success')
+                        .on('click', function () {
+                            modal.modal('hide');
+                        });
+                    modal.modal('show');
                 });
 
                 request.fail(errorHandler);
@@ -173,8 +216,8 @@ $(document).ready(function () {
     /**
      * ################ APPLICATION ################
      */
-    linkTextinput.on('change', function (e) {
-        var text = linkTextinput.val();
+    linkTextInput.on('change', function (e) {
+        var text = linkTextInput.val();
 
         Util.removeClassesFromElements(
             [hashFormGroup, checkButton, linkIconSpan],
@@ -209,7 +252,9 @@ $(document).ready(function () {
     });
 
     checkButton.on('click', function () {
-        var link = linkTextinput.val();
+        var link = linkTextInput.val();
+
+        hasherResultDiv.hide();
 
         // Checks if the Facebook cookie is present
         if (Cookies.readCookie('fbsr_' + Facebook.appId) &&
@@ -231,6 +276,27 @@ $(document).ready(function () {
         } else {
             modalLogin.modal('show');
         }
-
     });
+
+    validateButton.on('click', function () {
+       var code = codeTextInput.val() || '',
+           hash = hashTextInput.val() || '';
+
+
+       // Checks if code and hash are present
+       if (code && hash) {
+           Requester.validateHash(code, hash);
+       } else {
+           modalTitle.text('Warning!');
+           modalContent.text('There is a problem with the validation input data. Have you inserted all?.');
+           modalButton
+               .addClass('btn-warning')
+               .text('Ok')
+               .on('click', function () {
+                   modal.modal('hide');
+               });
+           modal.modal('show');
+       }
+    });
+
 }());

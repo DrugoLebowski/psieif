@@ -31,6 +31,10 @@ class Util
         return preg_match($pattern, $url);
     }
 
+    /**
+     * @param   string  $url
+     * @return  int     The type of the url (Refers to the
+     */
     public static function getFBUrlType($url)
     {
         if (preg_match('/^\/[a-zA-Z0-9.]+\/posts\/\d{1,}/', $url)) {
@@ -129,6 +133,27 @@ class Util
                 ]
             ]));
         }
+    }
 
+    /**
+     * Generates a code long as the specified length.
+     *
+     * @param   int     $length
+     * @return  string  The generated code as string.
+     */
+    public static function generateCode($length = 8)
+    {
+        $baseChars = "abcdefghjklmnopqrstuwxyz" .
+            "ABCDEFGHJKLMNOPQRSTUWXYZ" .
+            "0123456789" .
+            "!@$";
+        $baseCharsLength = mb_strlen($baseChars);
+
+        $password = "";
+        for ($i = 0; $i < $length; $i++) {
+            $password .= $baseChars[rand(0, $baseCharsLength - 1)];
+        }
+
+        return $password;
     }
 }

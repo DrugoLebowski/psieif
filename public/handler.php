@@ -6,21 +6,28 @@ use League\Uri\Schemes\Http as HttpUri;
 use League\Uri\Components\Query;
 use League\Uri\Components\HierarchicalPath;
 use Facebook\Facebook;
-use Facebook\Exceptions\FacebookResponseException;
-use Facebook\Exceptions\FacebookSDKException;
 
 require __DIR__ . '/../vendor/autoload.php';
+
+// Requires the application settings
+$settings = require __DIR__ . '/../config/settings.php';
 
 // Initialize handler
 $host           = $_SERVER['HTTP_HOST'];
 $baseTmpPath    = __DIR__.'/../.tmp/';
 $baseSavingPath = __DIR__ . '/hashes/';
-$db             = new Database('localhost', '3306',
-    'psieif', 'root', 's4npaol0');
+$db             = new Database(
+    $settings['database']['host'],
+    $settings['database']['port'],
+    $settings['database']['dbname'],
+    $settings['database']['user'],
+    $settings['database']['password']
+);
+
 try {
-    $fb    = new Facebook([
-        'app_id'                => '1536013056471626',
-        'app_secret'            => '94f915f27c720ae3c8932d1d6470e23a',
+    $fb = new Facebook([
+        'app_id'                => $settings['facebook']['appId'],
+        'app_secret'            => $settings['facebook']['appSecret'],
         'default_graph_version' => 'v2.9'
     ]);
 } catch(\Exception $e) {
@@ -62,6 +69,7 @@ if (empty($session['error'])) {
         $type = Util::getFBUrlType($path);
         $pageId = "";
         $postId = "";
+        $creator = "";
         switch ($type) {
             case Util::POST:
             case Util::VIDEO:
@@ -70,13 +78,17 @@ if (empty($session['error'])) {
                 $entityFBLink = 'https://www.facebook.com/'.$pathSegments[0];
                 $postId       = empty($pathSegments[3]) ?
                     $pathSegments[2] : $pathSegments[3];
-                $pageId = Util::makeFBRequest($fb, '/?id='.$entityFBLink,
-                    $accessToken)['id'];
+                $request = Util::makeFBRequest($fb, '/?id='.$entityFBLink,
+                    $accessToken);
+                $pageId = $request['id'];
+                $creator = $request['name'];
                 break;
             case Util::PERMALINK:
                 $query = new Query($uri->getQuery());
                 $pageId = $query->getPairs()['id'];
                 $postId = $query->getPairs()['story_fbid'];
+                $creator = Util::makeFBRequest($fb, '/?id='.$resourceLink,
+                    $accessToken)['name'];
             default:
         }
 
@@ -133,7 +145,6 @@ if (empty($session['error'])) {
             file_put_contents($tmpSavePath.'/data.json',
                 serialize(json_encode($parsedData)));
 
-
             // Makes hash (the footprint) of the post's zip
             mkdir($tmpSaveOutPath, 0755);
             $zipName = Util::makeDirZip($resourceDir, $tmpSavePath,
@@ -141,8 +152,12 @@ if (empty($session['error'])) {
             $hash = hash_file('sha256',
                 $tmpSaveOutPath.'/'.$zipName);
             file_put_contents($tmpSaveOutPath.'/'.$hash, "");
-            $zipName = Util::makeDirZip($hash, $tmpSaveOutPath.'/',
+
+            // Generate code associated to the hash (Only for validation purpose)
+            $code = hash('crc32', $hash.'-'.Util::generateCode());
+            $zipName = Util::makeDirZip($code, $tmpSaveOutPath.'/',
                 $baseSavingPath);
+            $creationDate = date('Y-n-j');
 
             // Checks if the hash already exists in the DB
             $query = $dbInstance->prepare(
@@ -150,7 +165,8 @@ if (empty($session['error'])) {
                 'FROM posts '.
                 'WHERE hash=:hash'
             );
-            $query->execute([':hash' => $hash]);
+            $query->bindParam(':hash', $hash, PDO::PARAM_STR);
+            $query->execute();
             $rows = $query->fetchAll();
             if (count($rows) !== 0) {
                 $zipName = $rows[0]['name'];
@@ -158,12 +174,15 @@ if (empty($session['error'])) {
             } else {
                 // Now saves the post hash to the database
                 $query = $dbInstance->prepare(
-                    'INSERT INTO posts(name, hash, date)'.
-                    'VALUES (:name, :hash, :date)'
+                    'INSERT INTO posts(code, creator, ref_post, name, hash, date)'.
+                    'VALUES (:code, :creator, :ref_post, :name, :hash, :date)'
                 );
-                $query->bindParam(':name', $zipName);
-                $query->bindParam(':hash', $hash);
-                $query->bindParam(':date', date('Y-n-j'));
+                $query->bindParam(':code', $code, PDO::PARAM_STR);
+                $query->bindParam(':creator', $creator, PDO::PARAM_STR);
+                $query->bindParam(':ref_post', $resourceLink, PDO::PARAM_STR);
+                $query->bindParam(':name', $zipName, PDO::PARAM_STR);
+                $query->bindParam(':hash', $hash, PDO::PARAM_STR);
+                $query->bindParam(':date', $creationDate);
                 if (!$query->execute()) {
                     http_response_code(500);
                     exit(json_encode([
@@ -175,20 +194,30 @@ if (empty($session['error'])) {
                         ]
                     ]));
                 }
-
-                // Flushes the working directory
             }
-            system('rm -rf ' . escapeshellarg($tmpSavePath));
 
+            // Flushes the working directory
+            system('rm -rf ' . escapeshellarg($tmpSavePath));
 
             // Finally, sends the response
             http_response_code(200);
-            exit(json_encode([
+            echo(json_encode([
                 'status'    => 'OK',
                 'data'      => [
-                    'location'  => "http://".$host.'/hashes/'.$zipName
+                    'date'      => $creationDate,
+                    'code'      => $code,
+                    'owner'     => $creator,
+                    'hash'      => $hash,
+                    'location'  => 'http://'.$host.'/hashes/'.$zipName
                 ]
             ]));
+            fastcgi_finish_request();
+
+
+            // Sleeps for 120 seconds and destroys the zip after this time.
+            sleep(120);
+            system('rm ' . escapeshellarg($baseSavingPath.'/'.$zipName));
+            exit();
         } else {
             http_response_code(400);
             exit(json_encode([

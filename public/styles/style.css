@@ -5,6 +5,10 @@ html, body {
     padding: 0;
 }
 
+.nav-custom {
+    border-bottom: 0;
+}
+
 .form-header {
     height: 75px;
     margin-bottom: 50px;
@@ -31,3 +35,29 @@ div#tips {
     display: none;
     color: #a94442;
 }
+
+.break-word {
+    word-wrap: break-word;
+}
+
+.btn-large {
+    width: 100%;
+}
+
+#result > a.list-group-item:hover,
+#result > a.list-group-item:focus,
+#result > a.list-group-item:hover {
+    background-color: transparent;
+}
+
+#result > a.list-group-item.button {
+    color: #fff;
+    background-color: #67b769;
+    border-color: #67b769;
+}
+    #result .no-margin {
+        margin: 0;
+    }
+    #result > a > span {
+        font-weight: bold;
+    }
