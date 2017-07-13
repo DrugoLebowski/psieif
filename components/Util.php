@@ -156,4 +156,18 @@ class Util
 
         return $password;
     }
+
+    /**
+     * Saves an image to the $savingPath.
+     *
+     * @param   string  $target
+     * @param   string  $name
+     * @param   string  $savingPath
+     */
+    public static function saveAttachment($target, $name, $savingPath)
+    {
+        $imageId = $name.'.jpg';
+        file_put_contents($savingPath.'/'.$imageId,
+            fopen($target, 'r'));
+    }
 }

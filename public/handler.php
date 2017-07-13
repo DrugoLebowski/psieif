@@ -95,7 +95,7 @@ if (empty($session['error'])) {
         // Retrieve the data associated to the facebook resource
         $resourceId = $pageId.'_'.$postId;
         $data = Util::makeFBRequest($fb,
-            '/'.$resourceId.'?fields=attachments,source,comments.limit(10000000){likes,attachment,comments.limit(10000000){attachment,message,from},from,message}',
+            '/'.$resourceId.'?fields=attachments,source,comments.limit(10000000){attachment,comments.limit(10000000){attachment,message,from},from,message}',
             $accessToken
         );
 
@@ -115,21 +115,68 @@ if (empty($session['error'])) {
 
             // Saves the attachments, if it exists in the downloaded resource
             if (!empty($data['attachments'])) {
-                mkdir($tmpSavePath.'/attachments', 0755);
+                $attachmentSavingPath = $tmpSavePath.'/attachments';
+                mkdir($attachmentSavingPath, 0755);
                 $parsedData['attachments'] = $data['attachments']['data'];
                 foreach ($parsedData['attachments'] as $attachment) {
-                    $src     = $attachment['media']['image']['src'];
-                    $imageId = $resourceId.'.jpg';
-                    file_put_contents($tmpSavePath.'/attachments/'.$imageId,
-                        fopen($src, 'r'));
+                    Util::saveAttachment($attachment['media']['image']['src'],
+                        $resourceId, $attachmentSavingPath);
                 }
             }
 
             // Saves the comments (and sub-comments), if it exists in the downloaded resource
             if (!empty($data['comments'])) {
-                mkdir($tmpSavePath.'/comments', 0755);
-                $parsedData['comments'] = $data['comments']['data'];
-                // TODO: save comments
+                $commentsSavingPath = $tmpSavePath.'/comments';
+                mkdir($commentsSavingPath, 0755);
+                $parsedData['comments'] = [];
+                $comments = $data['comments']['data'];
+                foreach ($comments as $comment) {
+                    $parsedComment['id']            = $comment['id'];
+                    $parsedComment['from']          = $comment['from'];
+                    $parsedComment['message']       = $comment['message'];
+
+                    // Path where the attachments about this resource will be saved.
+                    $commentsAttachSavingPath =
+                        $commentsSavingPath.'/'.$parsedComment['id'];
+                    if (!empty($comment['attachment'])) {
+                        mkdir($commentsAttachSavingPath, 0755);
+                        $parsedComment['attachment']    = $comment['attachment'];
+                        Util::saveAttachment(
+                            $parsedComment['media']['image']['src'],
+                            $parsedComment['id'],
+                            $commentsAttachSavingPath
+                        );
+                    }
+
+                    // Now, if they exist, parse the comments of the current comment
+                    if (!empty($comment['comments'])) {
+                        $parsedCCs                  = $comment['comments']['data'];
+                        $parsedComment['comments']  = [];
+                        foreach ($parsedCCs as $parsedCC) {
+                            $commentsComment['id']      = $parsedCC['id'];
+                            $commentsComment['from']    = $parsedCC['from'];
+                            $commentsComment['message'] = $parsedCC['message'];
+
+                            if (!empty($parsedCC['attachment'])) {
+                                $commentsComment['attachment'] = $parsedCC['attachment'];
+
+                                // Checks if the saving directory is not already created
+                                if (!file_exists($commentsAttachSavingPath)) {
+                                    mkdir($commentsAttachSavingPath, 0755);
+                                }
+
+                                Util::saveAttachment(
+                                    $commentsComment['attachment']['media']['image']['src'],
+                                    $commentsComment['id'],
+                                    $commentsAttachSavingPath
+                                );
+                            }
+
+                            array_push($parsedComment['comments'], $commentsComment);
+                        }
+                    }
+                    array_push($parsedData['comments'], $parsedComment);
+                }
             }
 
             // Saves the source, if it exists in the downloaded resource
@@ -143,7 +190,7 @@ if (empty($session['error'])) {
 
             // Saves the parsed response
             file_put_contents($tmpSavePath.'/data.json',
-                serialize(json_encode($parsedData)));
+                json_encode($parsedData));
 
             // Makes hash (the footprint) of the post's zip
             mkdir($tmpSaveOutPath, 0755);
