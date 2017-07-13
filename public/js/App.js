@@ -33,8 +33,8 @@ $(document).ready(function () {
 
         // Contains the endpoints of the app
         var Endpoints = {
-            hash:       '/handler.php?XDEBUG_SESSION_START',
-            validate:   '/validate.php?XDEBUG_SESSION_START'
+            hash:       '/handler?XDEBUG_SESSION_START',
+            validate:   '/validate?XDEBUG_SESSION_START'
         };
 
         var errorHandler = function (e) {

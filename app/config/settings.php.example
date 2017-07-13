@@ -1,0 +1,15 @@
+<?php
+
+return [
+    'database'  => [
+        'host'      => '',
+        'port'      => '',
+        'dbname'    => '',
+        'user'      => '',
+        'password'  => ''
+    ],
+    'facebook'  => [
+        'appId'     => '',
+        'appSecret' => ''
+    ]
+];

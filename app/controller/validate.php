@@ -2,8 +2,6 @@
 
 use App\Components\Database;
 
-require __DIR__.'/../vendor/autoload.php';
-
 $settings = require __DIR__ . '/../config/settings.php';
 
 // Initialize handler

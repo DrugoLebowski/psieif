@@ -3,7 +3,6 @@
 namespace App\Components;
 
 use PDO;
-use Monolog\Logger;
 
 /**
  *

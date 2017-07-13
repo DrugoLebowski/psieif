@@ -2,7 +2,6 @@
 
 namespace App\Components;
 
-
 use Facebook\Exceptions\FacebookResponseException;
 use Facebook\Exceptions\FacebookSDKException;
 use Facebook\Facebook;
@@ -10,6 +9,12 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ZipArchive;
 
+/**
+ * A simple utility class, used to store utility function. Nothing more, really.
+ *
+ * Class Util
+ * @package App\Components
+ */
 class Util
 {
     // Facebook content types
@@ -155,5 +160,37 @@ class Util
         }
 
         return $password;
+    }
+
+    /**
+     * Saves an attachment to the $savingPath.
+     *
+     * @param   string  $target
+     * @param   string  $name
+     * @param   string  $savingPath
+     */
+    public static function saveAttachment($attachment, $name, $savingPath)
+    {
+        $type = $attachment['type'];
+
+        // If the attachment is an animated_image_autoplay, then saves also the
+        // animated version.
+        if ($type === 'animated_image_autoplay' || $type === 'share') {
+            $gif    = $name.'.gif';
+            file_put_contents($savingPath.'/'.$gif,
+                fopen($attachment['url'], 'r'));
+
+            /*
+             * FIXME: Download resource correlated to 'animated_image_autoplay' or 'share' links
+             * This links are redirected not automatically by facebook.
+             * To do this we must scrape through the downloaded page and
+             * retrieve the correct link inside latter.
+             */
+        }
+
+        // For all the attachments saves the static version.
+        $imageId = $name.'.jpg';
+        file_put_contents($savingPath.'/'.$imageId,
+            fopen($attachment['media']['image']['src'], 'r'));
     }
 }

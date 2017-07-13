@@ -24,7 +24,7 @@
     "autoload-dev": {
         "psr-4": {
             "App\\": "public/",
-            "App\\Components\\": "components/"
+            "App\\Components\\": "app/component/"
         }
     }
 }
