@@ -17,7 +17,7 @@ if ($method === 'POST') {
         if (file_exists(__DIR__.'/hashes/'.$file)) {
             return __DIR__.'/hashes/'.$file;
         }
-    } else if (preg_match('/\//', $target)) {
+    } else if ('/' === $target) {
         return require __DIR__.'/../app/view/index.html';
     }
 }
