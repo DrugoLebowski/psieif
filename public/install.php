@@ -1,11 +1,8 @@
 <?php
 
-use App\Components\Database;
+use App\Component\Database;
 
 require __DIR__.'/../vendor/autoload.php';
-
-// Requires the application settings
-$settings = require __DIR__ . '/../config/settings.php';
 
 $db = (new Database(
     $settings['database']['host'],
@@ -28,3 +25,13 @@ $db->query("DROP TABLE IF EXISTS `posts`;
     UNIQUE KEY `hash` (`hash`)
   ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4;"
 )->execute();
+
+$tmpDir = __DIR__.'/../.tmp';
+if (!file_exists($tmpDir)) {
+    mkdir($tmpDir, 0755);
+}
+
+$pollerDir = $tmpDir.'/poller';
+if (!file_exists($pollerDir)) {
+    mkdir($pollerDir, 0755);
+}

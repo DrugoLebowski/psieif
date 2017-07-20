@@ -11,5 +11,6 @@ return [
     'facebook'  => [
         'appId'     => '',
         'appSecret' => ''
-    ]
+    ],
+    'poll_resource_path' => realpath(__DIR__ . '/../../.tmp/poller/'),
 ];

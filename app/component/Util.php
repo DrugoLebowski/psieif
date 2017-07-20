@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Components;
+namespace App\Component;
 
 use Facebook\Exceptions\FacebookResponseException;
 use Facebook\Exceptions\FacebookSDKException;
@@ -171,26 +171,58 @@ class Util
      */
     public static function saveAttachment($attachment, $name, $savingPath)
     {
-        $type = $attachment['type'];
+        $files = [
+            $attachment['media']['image']['src'],
+            $attachment['target']['url']
+        ];
+        $savingPath = $savingPath.'/'.$name;
+        $matches = [];
+        $pattern = '/((http|https){1}(\:\/\/)){1}[a-zA-Z0-9\.\/\-\_]+/';
 
-        // If the attachment is an animated_image_autoplay, then saves also the
-        // animated version.
-        if ($type === 'animated_image_autoplay' || $type === 'share') {
-            $gif    = $name.'.gif';
-            file_put_contents($savingPath.'/'.$gif,
-                fopen($attachment['url'], 'r'));
+        foreach ($files as $f) {
+            // For all the attachments saves the static version.
+            $url = urldecode($f);
+            preg_match_all(
+                $pattern,
+                $url,
+                $matches
+            );
 
-            /*
-             * FIXME: Download resource correlated to 'animated_image_autoplay' or 'share' links
-             * This links are redirected not automatically by facebook.
-             * To do this we must scrape through the downloaded page and
-             * retrieve the correct link inside latter.
-             */
+            // Now retrieves the first results, if it exists, and controls if
+            // is a correct url. If the link has `scontent` inside, leaves the url intact.
+            if (preg_match('/(http|https){1}(\:\/\/){1}(scontent){1}/', $f)) {
+                $hypotheticalUrl = $f;
+            } else {
+                $hypotheticalUrl = !empty($matches[0][1]) ? $matches[0][1] :
+                    (!empty($matches[0][0]) ? $matches[0][0] : '');
+            }
+
+            if (preg_match($pattern, $hypotheticalUrl)) {
+                file_put_contents($savingPath,
+                    fopen($hypotheticalUrl, 'r'));
+                $exif = exif_imagetype(realpath($savingPath));
+                $type = '';
+                switch ($exif) {
+                    case IMAGETYPE_GIF:
+                        $type = '.gif';
+                        break;
+                    case IMAGETYPE_JPEG:
+                        $type = '.jpeg';
+                        break;
+                    case IMAGETYPE_WEBP:
+                        $type = '.webp';
+                        break;
+                    default:
+                }
+
+
+                if (!empty($type)) {
+                    rename($savingPath, $savingPath.$type);
+                } else {
+                    system('rm -f ' . escapeshellarg($savingPath));
+                }
+            }
         }
-
-        // For all the attachments saves the static version.
-        $imageId = $name.'.jpg';
-        file_put_contents($savingPath.'/'.$imageId,
-            fopen($attachment['media']['image']['src'], 'r'));
     }
+
 }

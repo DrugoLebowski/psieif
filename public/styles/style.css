@@ -44,10 +44,14 @@ div#tips {
     width: 100%;
 }
 
-#result > a.list-group-item:hover,
-#result > a.list-group-item:focus,
-#result > a.list-group-item:hover {
+#result > a.list-group-item:hover:not(:first-child):not(:last-child),
+#result > a.list-group-item:focus:not(:first-child):not(:last-child) {
     background-color: transparent;
+}
+
+#result > a.list-group-item:hover:last-child,
+#result > a.list-group-item:focus:last-child {
+    background-color: #64aa65;
 }
 
 #result > a.list-group-item.button {

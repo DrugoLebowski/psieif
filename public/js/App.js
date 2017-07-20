@@ -24,6 +24,12 @@ $(document).ready(function () {
     var tipsDiv         = $('div#tips');
     var hasherResultDiv = $('div#result');
 
+    var progress        = $('div#progress'),
+        progressComplete= $('div#progress .complete'),
+        progressBar     = $('div#progress .progress-bar');
+
+    var pollerResource = "";
+
     /**
      * ################ DECLARING MODULES ################
      */
@@ -34,7 +40,8 @@ $(document).ready(function () {
         // Contains the endpoints of the app
         var Endpoints = {
             hash:       '/handler?XDEBUG_SESSION_START',
-            validate:   '/validate?XDEBUG_SESSION_START'
+            validate:   '/validate?XDEBUG_SESSION_START',
+            poller:     '/poller?XDEBUG_SESSION_START'
         };
 
         var errorHandler = function (e) {
@@ -75,14 +82,19 @@ $(document).ready(function () {
 
         return {
             hashContent: function (link) {
-                var request = $.ajax({
-                    url: Endpoints.hash,
-                    method: 'post',
-                    timeout: 360000,
-                    data: {
-                        link: link
-                    }
-                });
+                pollerResource = md5(link + '_' + (new Date()).getTime());
+                progress.fadeIn(100);
+
+                var intervalId     = setInterval(this.poller, 1000),
+                    request        = $.ajax({
+                        url: Endpoints.hash,
+                        method: 'post',
+                        timeout: 360000,
+                        data: {
+                            link: link,
+                            'hash_link': pollerResource
+                        }
+                    });
 
                 request.done(function (response) {
                     var parsedRes   = JSON.parse(response),
@@ -92,15 +104,28 @@ $(document).ready(function () {
                         resultHash  = $('#result_hash'),
                         resultBut   = $('#result_download');
 
-                    resultOwner.text(parsedRes.data.owner);
-                    resultDate.text(parsedRes.data.date);
-                    resultCode.text(parsedRes.data.code);
-                    resultHash.text(parsedRes.data.hash);
-                    resultBut.attr('href', parsedRes.data.location);
-                    hasherResultDiv.show();
+                    clearInterval(intervalId);
+                    progressBar.css('width', '100%');
+                    progressComplete.fadeIn(200);
+
+                    setTimeout(function () {
+                        progress.fadeOut(0);
+                        progressComplete.fadeOut(0);
+                        progressBar.css('width', '0%');
+                        resultOwner.text(parsedRes.data.owner);
+                        resultDate.text(parsedRes.data.date);
+                        resultCode.text(parsedRes.data.code);
+                        resultHash.text(parsedRes.data.hash);
+                        resultBut.attr('href', parsedRes.data.location);
+                        hasherResultDiv.fadeIn(400);
+                    }, 1000);
                 });
 
-                request.fail(errorHandler);
+                request.fail(function (e) {
+                    progress.fadeOut(200);
+                    clearInterval(intervalId);
+                    errorHandler(e);
+                });
             },
             validateHash: function (code, hash) {
                 var request = $.ajax({
@@ -115,6 +140,8 @@ $(document).ready(function () {
                 request.done(function (response) {
                     var parsedRes = JSON.parse(response);
 
+                    Util.removeClass(modalButton, /btn\-(success|danger){1}/g);
+
                     modalTitle.text("Success!");
                     modalContent.text(parsedRes.data.message);
                     modalButton
@@ -127,6 +154,25 @@ $(document).ready(function () {
                 });
 
                 request.fail(errorHandler);
+            },
+            poller: function () {
+                var request = $.ajax({
+                    url:    Endpoints.poller,
+                    method: 'post',
+                    data: {
+                        resource: pollerResource
+                    }
+                });
+
+
+                request.done(function (response) {
+                    var jResponse = JSON.parse(response);
+                    progressBar.css('width', jResponse.data.global_progress + '%');
+                });
+
+                request.fail(function (error) {
+                    console.log(JSON.stringify(error));
+                })
             }
         }
     }());

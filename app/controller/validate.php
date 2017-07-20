@@ -1,6 +1,6 @@
 <?php
 
-use App\Components\Database;
+use App\Component\Database;
 
 $settings = require __DIR__ . '/../config/settings.php';
 
