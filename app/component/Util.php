@@ -182,11 +182,7 @@ class Util
         foreach ($files as $f) {
             // For all the attachments saves the static version.
             $url = urldecode($f);
-            preg_match_all(
-                $pattern,
-                $url,
-                $matches
-            );
+            preg_match_all($pattern, $url, $matches);
 
             // Now retrieves the first results, if it exists, and controls if
             // is a correct url. If the link has `scontent` inside, leaves the url intact.
@@ -197,6 +193,9 @@ class Util
                     (!empty($matches[0][0]) ? $matches[0][0] : '');
             }
 
+            // Checks another time if the URL is correct, downloads the file
+            // and then checks the exif of the latter. If it can recognize an
+            // exif of an image, it renames the file with the correct file extension.
             if (preg_match($pattern, $hypotheticalUrl)) {
                 file_put_contents($savingPath,
                     fopen($hypotheticalUrl, 'r'));
@@ -211,6 +210,12 @@ class Util
                         break;
                     case IMAGETYPE_WEBP:
                         $type = '.webp';
+                        break;
+                    case IMAGETYPE_PNG:
+                        $type = '.png';
+                        break;
+                    case IMAGETYPE_BMP:
+                        $type = '.bmp';
                         break;
                     default:
                 }

@@ -2,8 +2,6 @@
 
 use App\Component\Database;
 
-$settings = require __DIR__ . '/../config/settings.php';
-
 // Initialize handler
 $db = (new Database(
     $settings['database']['host'],

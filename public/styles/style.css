@@ -9,6 +9,7 @@ html, body {
     border-bottom: 0;
 }
 
+/* Header */
 .form-header {
     height: 75px;
     margin-bottom: 50px;
@@ -23,6 +24,15 @@ html, body {
             display: inline-block;
             margin: 0;
         }
+        .form-header > .h1Container img {
+            width: 125px;
+            height: 125px;
+        }
+
+/* Form */
+.container > .row:last-child {
+    margin-top: 125px;
+}
 
 /* Panel */
 div#progress {

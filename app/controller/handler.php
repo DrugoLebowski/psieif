@@ -156,6 +156,7 @@ if (empty($session['error'])) {
                 mkdir($commentsSavingPath, 0755);
                 $parsedData['comments'] = [];
                 $comments = $data['comments']['data'];
+                $commentsCounter = 1;
                 foreach ($comments as $comment) {
                     $parsedComment['id']      = $comment['id'];
                     $parsedComment['from']    = $comment['from'];
@@ -196,9 +197,11 @@ if (empty($session['error'])) {
                         }
                     }
                     array_push($parsedData['comments'], $parsedComment);
+                    $resourcePoller->writeKeyToPoll('global_progress', 20 +
+                        ($commentsCounter / count($comments)) * 50);
+                    $commentsCounter++;
                 }
             }
-            $resourcePoller->writeKeyToPoll('global_progress', 70);
 
             // Saves the source, if it exists in the downloaded resource
             if (!empty($data['source'])) {

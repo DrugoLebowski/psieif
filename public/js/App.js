@@ -34,7 +34,7 @@ $(document).ready(function () {
      * ################ DECLARING MODULES ################
      */
 
-    // Manages the request to the server
+    // Manages the requests to the server
     var Requester = (function () {
 
         // Contains the endpoints of the app
@@ -69,7 +69,16 @@ $(document).ready(function () {
                 case '@invalid_uri_error':
                 case '@facebook_data_fetching_error':
                 case '@not_a_page_error':
+                case '@invalid_input_error':
+                case '@code_hash_validation_errror':
                     modalContent.text(jResponse.data.message);
+                    break;
+                case '@facebook_sdk_error':
+                case '@resource_poller_handler_error':
+                case '@uknown_error':
+                case '@query_execution_error':
+                    modalContent.text('It\'s happened an error.');
+                    console.log(jResponse.data.message);
                     break;
                 default:
                     modalTitle.text('Unrecognized error!');
