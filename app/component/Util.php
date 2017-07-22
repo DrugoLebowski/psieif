@@ -24,14 +24,16 @@ class Util
     const PAGE_PHOTO   = 3;
     const USER_PHOTO   = 4;
     const PERMALINK    = 5;
+    const EVENTS_PERMALINK = 6;
 
     public static function validateFBUrl ($url)
     {
         $pattern =
             '/^((https|http):\/\/)\n?((www|m|mbasic)\.facebook\.com)'.
             '(\/((([a-zA-Z0-9.]+)(\/(((posts|videos)\/\d{1,})|'.
-            '((photos){1}\/a\.\d{1,}\.\d{1,}\.\d{1,}\/\d{1,}))))|'.
-            /*'(photo\.php)|*/'(permalink\.php\?story_fbid=\d{1,}&id=\d{1,})))/';
+            '(photos\/a\.\d{1,}\.\d{1,}\.\d{1,}\/\d{1,}))))|'.
+            /*'(photo\.php)|*/'(permalink\.php\?story_fbid=\d{1,}&id=\d{1,})|'.
+            '(events\/\d{1,}\/permalink\/\d{1,})))/';
 
         return preg_match($pattern, $url);
     }
@@ -54,6 +56,8 @@ class Util
             return Util::USER_PHOTO;
         } else if (preg_match('/^\/permalink\.php/', $url)) {
             return Util::PERMALINK;
+        } else if (preg_match('/^\/events\/\d{1,}\/permalink\/\d{1,}/', $url)) {
+            return Util::EVENTS_PERMALINK;
         } else {
             return Util::UNKNOWN;
         }

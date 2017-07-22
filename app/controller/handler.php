@@ -111,6 +111,16 @@ if (empty($session['error'])) {
                 $postId = $query->getPairs()['story_fbid'];
                 $creator = Util::makeFBRequest($fb, '/?id='.$resourceLink,
                     $accessToken)['name'];
+                break;
+            CASE Util::EVENTS_PERMALINK:
+                $pathSegments = (new HierarchicalPath($path))->getSegments();
+                $pageId       = $pathSegments[1];
+                $postId       = empty($pathSegments[3]) ?
+                    $pathSegments[2] : $pathSegments[3];
+                $entityFBLink = 'https://www.facebook.com/'.$pathSegments[0];
+                $request = Util::makeFBRequest($fb, '/'.$pageId,
+                    $accessToken);
+                $creator = $request['name'];
             default:
         }
 
