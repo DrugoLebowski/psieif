@@ -10,25 +10,28 @@ $(document).ready(function () {
         modalButton     = $('#modal-button');
 
     // Contains the ref the login form
-    var modalLogin      = $('#modal-login');
+    var modalLogin      = $('#modal-log');
 
-    var panel           = $('#panel');
+    // Tabs
+    var tabHasher       = $('#a-hasher'),
+        tabValidate     = $('#a-validate');
+
+    // Panel
+    var panelHasher     = $('#hasher'),
+        panelValidate   = $('#validate');
+
     var checkButton     = $('button#checkBtn');
     var validateButton  = $('button#validateBtn');
     var linkTextInput   = $('input#link');
     var codeTextInput   = $('input#code');
     var hashTextInput   = $('input#hash');
-    var hashFormGroup   = $('div#hasher > .form-group');
-    var validateFormGroup = $('div#validate > .form-group');
-    var linkIconSpan    = $('span#linkIcon');
+    var linkIconSpan    = $('i#linkIcon');
     var tipsDiv         = $('div#tips');
     var hasherResultDiv = $('div#result');
 
     var progress        = $('div#progress'),
         progressComplete= $('div#progress .complete'),
-        progressBar     = $('div#progress .progress-bar');
-
-    var pollerResource = "";
+        progressBar     = $('div#progress .progress > .bar');
 
     /**
      * ################ DECLARING MODULES ################
@@ -51,7 +54,7 @@ $(document).ready(function () {
             modalButton.addClass('btn-danger');
             modalButton.text('Ok.');
             modalButton.on('click', function (e) {
-                modal.modal('hide');
+                $.modal.close();
             });
 
             switch (jResponse.code) {
@@ -63,7 +66,7 @@ $(document).ready(function () {
                     modalContent.text(jResponse.data.message);
                     modalButton.on('click', function (e) {
                        checkButton.click();
-                       modal.modal('hide');
+                        $.modal.close();
                     });
                     break;
                 case '@invalid_uri_error':
@@ -73,7 +76,7 @@ $(document).ready(function () {
                 case '@code_hash_validation_errror':
                     modalContent.text(jResponse.data.message);
                     break;
-                case '@facebook_sdk_error':
+                case '@fb_sdk_error':
                 case '@resource_poller_handler_error':
                 case '@uknown_error':
                 case '@query_execution_error':
@@ -86,12 +89,15 @@ $(document).ready(function () {
                     modalButton.text('mmm \'kay...');
             }
 
-            modal.modal('show');
+            $(modal).modal({
+                fadeDuration: 250
+            });
         };
 
         return {
+            pollerResource: '',
             hashContent: function (link) {
-                pollerResource = md5(link + '_' + (new Date()).getTime());
+                Requester.pollerResource = md5(link + '_' + (new Date()).getTime());
                 progress.fadeIn(100);
 
                 var intervalId     = setInterval(this.poller, 1000),
@@ -101,7 +107,7 @@ $(document).ready(function () {
                         timeout: 360000,
                         data: {
                             link: link,
-                            'hash_link': pollerResource
+                            'hash_link': Requester.pollerResource
                         }
                     });
 
@@ -157,9 +163,11 @@ $(document).ready(function () {
                         .text('Close')
                         .addClass('btn-success')
                         .on('click', function () {
-                            modal.modal('hide');
+                            $.modal.close();
                         });
-                    modal.modal('show');
+                    $(modal).modal({
+                        fadeDuration: 250
+                    });
                 });
 
                 request.fail(errorHandler);
@@ -169,14 +177,14 @@ $(document).ready(function () {
                     url:    Endpoints.poller,
                     method: 'post',
                     data: {
-                        resource: pollerResource
+                        resource: Requester.pollerResource
                     }
                 });
 
 
                 request.done(function (response) {
                     var jResponse = JSON.parse(response);
-                    progressBar.css('width', jResponse.data.global_progress + '%');
+                    progressBar.css('width', jResponse.data.global_progress + "%");
                 });
 
                 request.fail(function (error) {
@@ -258,7 +266,7 @@ $(document).ready(function () {
 
     // Manages the validation of this app
     var Validator = (function () {
-        var pattern = /^((https|http):\/\/)\n?((www|m|mbasic)\.facebook\.com)(\/((([a-zA-Z0-9.]+)(\/(((posts|videos)\/\d{1,})|((photos){1}\/a\.\d{1,}\.\d{1,}\.\d{1,}\/\d{1,}))))|(photo\.php)|(permalink\.php\?story_fbid=\d{1,}&id=\d{1,})))/;
+        var pattern = /^((https|http):\/\/)?((www|m|mbasic)\.facebook\.com)(\/((([a-zA-Z0-9.]+)(\/(((posts|videos){1}\/\d{1,})|(photos\/a\.\d{1,}\.\d{1,}\/\d{1,}))))|(permalink\.php\?story_fbid=\d{1,}&id=\d{1,})|(events\/\d{1,}\/permalink\/\d{1,})))/;
 
         return {
             isFacebookUrlValid: function (url) {
@@ -275,31 +283,31 @@ $(document).ready(function () {
         var text = linkTextInput.val();
 
         Util.removeClassesFromElements(
-            [hashFormGroup, checkButton, linkIconSpan],
+            [linkTextInput, checkButton, linkIconSpan],
             [
-                [/has\-(success|error)+/g],
-                [/btn\-(success|danger)+/g],
-                [/glyphicon\-(ok|remove)+/g]
+                [/is\-(success|danger)+/g],
+                [/is\-(success|danger)+/g],
+                [/fa\-(check|times)+/g]
             ]
         );
 
         if (Validator.isFacebookUrlValid(text)) {
             Util.addClassesToElements(
-                [hashFormGroup, checkButton, linkIconSpan],
+                [linkTextInput, checkButton, linkIconSpan],
                 [
-                    ['has-success'],
-                    ['btn-success'],
-                    ['glyphicon-ok']
+                    ['is-success'],
+                    ['is-success'],
+                    ['fa-check']
                 ]
             );
             tipsDiv.hide("fast");
         } else {
             Util.addClassesToElements(
-                [hashFormGroup, checkButton, linkIconSpan],
+                [linkTextInput, checkButton, linkIconSpan],
                 [
-                    ['has-error'],
-                    ['btn-danger'],
-                    ['glyphicon-remove']
+                    ['is-danger'],
+                    ['is-danger'],
+                    ['fa-times']
                 ]
             );
             tipsDiv.show("fast");
@@ -322,14 +330,18 @@ $(document).ready(function () {
                     .addClass('btn-warning')
                     .text('Ok')
                     .on('click', function () {
-                       modal.modal('hide');
+                        $.modal.close();
                     });
-                modal.modal('show');
+                $(modal).modal({
+                    fadeDuration: 250
+                });
             } else {
                 Requester.hashContent(link);
             }
         } else {
-            modalLogin.modal('show');
+            $(modalLogin).modal({
+                fadeDuration: 250
+            });
         }
     });
 
@@ -348,10 +360,32 @@ $(document).ready(function () {
                .addClass('btn-warning')
                .text('Ok')
                .on('click', function () {
-                   modal.modal('hide');
+                   $.modal.close();
                });
-           modal.modal('show');
+           $(modal).modal({
+               fadeDuration: 250
+           });
        }
+    });
+
+    tabHasher.on('click', function (e) {
+        Util.removeClass(tabValidate.parent(), /is\-active/);
+        Util.addClass(tabHasher.parent(), 'is-active');
+
+        panelValidate.hide();
+        panelHasher.fadeIn(200);
+
+        e.preventDefault();
+    });
+
+    tabValidate.on('click', function (e) {
+        Util.removeClass(tabHasher.parent(), /is\-active/);
+        Util.addClass(tabValidate.parent(), 'is-active');
+
+        panelHasher.hide();
+        panelValidate.fadeIn(200);
+
+        e.preventDefault();
     });
 
 }());
