@@ -68,7 +68,9 @@ try {
 
 if (empty($session['error'])) {
     if (Util::validateFBUrl($resourceLink)) {
-
+        ignore_user_abort(true);
+        set_time_limit(0);
+        ob_start();
         $resourcePoller->writeToPoll($pollStructure);
 
         try {
@@ -294,13 +296,19 @@ if (empty($session['error'])) {
                     'location'  => 'http://'.$host.'/hashes/'.$zipName
                 ]
             ]));
-            fastcgi_finish_request();
+            header('Connection: close');
+            header('Content-Length: '.ob_get_length());
+            ob_end_flush();
+            ob_flush();
+            flush();
+
+            // fastcgi_finish_request();
             $resourcePoller->destroy();
 
 
             // Sleeps for 120 seconds and destroys the zip after this time.
-            sleep(120);
-            system('rm ' . escapeshellarg($baseSavingPath.'/'.$zipName));
+            //sleep(120);
+            //system('rm ' . escapeshellarg($baseSavingPath.'/'.$zipName));
             exit();
         } else {
             $resourcePoller->destroy();

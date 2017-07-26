@@ -3,6 +3,7 @@
 use App\Component\Database;
 
 require __DIR__.'/../vendor/autoload.php';
+
 $db = (new Database(
     $settings['database']['host'],
     $settings['database']['port'],
