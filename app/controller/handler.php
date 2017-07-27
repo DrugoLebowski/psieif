@@ -13,6 +13,7 @@ $host           = $_SERVER['HTTP_HOST'];
 $basePath       = __DIR__ . '/../..';
 $baseTmpPath    = $basePath . '/.tmp/';
 $baseSavingPath = $basePath . '/public/hashes/';
+$userIP=Util::getUserIP();
 $db             = new Database(
     $settings['database']['host'],
     $settings['database']['port'],
@@ -50,7 +51,7 @@ $resourceLink   = $_POST['link'];
 $hashLink       = $_POST['hash_link'];
 
 // Checks if the session is valid
-$session = Util::makeFBRequest($fb, '/me', $accessToken);
+$session = Util::makeFBRequest($fb, '/me?fields=id,name,email', $accessToken);
 
 // Initializes the progress handler
 try {
@@ -233,12 +234,15 @@ if (empty($session['error'])) {
             mkdir($tmpSaveOutPath, 0755);
             $zipName = Util::makeDirZip($resourceDir, $tmpSavePath,
                 $tmpSaveOutPath);
-            $hash = hash_file('sha256',
+            $hash_sha = hash_file('sha256',
                 $tmpSaveOutPath.'/'.$zipName);
-            file_put_contents($tmpSaveOutPath.'/'.$hash, "");
+            $hash_md5 = hash_file('md5',
+                $tmpSaveOutPath.'/'.$zipName);
+            file_put_contents($tmpSaveOutPath.'/'.$hash_sha, "");
+            file_put_contents($tmpSaveOutPath.'/'.$hash_md5, "");
 
             // Generate code associated to the hash (Only for validation purpose)
-            $code = hash('crc32', $hash.'-'.Util::generateCode());
+            $code = hash('crc32', $hash_sha.'-'.Util::generateCode());
             $zipName = Util::makeDirZip($code, $tmpSaveOutPath.'/',
                 $baseSavingPath);
             $creationDate = date('Y-n-j');
@@ -249,7 +253,7 @@ if (empty($session['error'])) {
                 'FROM posts '.
                 'WHERE hash=:hash'
             );
-            $query->bindParam(':hash', $hash, PDO::PARAM_STR);
+            $query->bindParam(':hash', $hash_sha, PDO::PARAM_STR);
             $query->execute();
             $rows = $query->fetchAll();
             if (count($rows) !== 0) {
@@ -258,14 +262,19 @@ if (empty($session['error'])) {
             } else {
                 // Now saves the post hash to the database
                 $query = $dbInstance->prepare(
-                    'INSERT INTO posts(code, creator, ref_post, name, hash, date)'.
-                    'VALUES (:code, :creator, :ref_post, :name, :hash, :date)'
+                    'INSERT INTO posts(code, creator, issuerId, issuerEmail, issuerName, issuerIPAddress, ref_post, name, hash_sha, hash_md5, date)'.
+                    'VALUES (:code, :creator, :issuerId, :issuerEmail , :issuerName,  :issuerIPAddress, :ref_post, :name, :hash_sha, :hash_md5, :date)'
                 );
                 $query->bindParam(':code', $code, PDO::PARAM_STR);
                 $query->bindParam(':creator', $creator, PDO::PARAM_STR);
+                $query->bindParam(':issuerId', $session["id"], PDO::PARAM_STR);
+                $query->bindParam(':issuerEmail', $session["email"], PDO::PARAM_STR);
+                $query->bindParam(':issuerName', $session["name"], PDO::PARAM_STR);
+                $query->bindParam(':issuerIPAddress', $userIP, PDO::PARAM_STR);
                 $query->bindParam(':ref_post', $resourceLink, PDO::PARAM_STR);
                 $query->bindParam(':name', $zipName, PDO::PARAM_STR);
-                $query->bindParam(':hash', $hash, PDO::PARAM_STR);
+                $query->bindParam(':hash_sha', $hash_sha, PDO::PARAM_STR);
+                $query->bindParam(':hash_md5', $hash_md5, PDO::PARAM_STR);
                 $query->bindParam(':date', $creationDate);
                 if (!$query->execute()) {
                     http_response_code(500);
@@ -292,7 +301,7 @@ if (empty($session['error'])) {
                     'date'      => $creationDate,
                     'code'      => $code,
                     'owner'     => $creator,
-                    'hash'      => $hash,
+                    'hash'      => $hash_sha,
                     'location'  => 'http://'.$host.'/hashes/'.$zipName
                 ]
             ]));

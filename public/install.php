@@ -4,6 +4,8 @@ use App\Component\Database;
 
 require __DIR__.'/../vendor/autoload.php';
 
+$settings = require __DIR__ . '/../app/config/settings.php';
+
 $db = (new Database(
     $settings['database']['host'],
     $settings['database']['port'],
@@ -18,7 +20,10 @@ $db->query("DROP TABLE IF EXISTS `posts`;
     `id` INT(11) NOT NULL AUTO_INCREMENT,
     `code` VARCHAR(8) NOT NULL,
     `creator` VARCHAR(128) NOT NULL,
-    `issuer` VARCHAR(128) NOT NULL,
+    `issuerId` VARCHAR(128) NOT NULL,
+    `issuerEmail` VARCHAR(128) NOT NULL,
+    `issuerName` VARCHAR(128) NOT NULL,
+    `issuerIPAddress` VARCHAR(128) NOT NULL,
     `ref_post` LONGTEXT NOT NULL,
     `name` varchar(128) NOT NULL,
     `hash_sha` VARCHAR(128) NOT NULL,
