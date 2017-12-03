@@ -1,0 +1,16 @@
+<?php
+
+return [
+    'database'  => [
+        'host'      => '',
+        'port'      => '',
+        'dbname'    => '',
+        'user'      => '',
+        'password'  => ''
+    ],
+    'facebook'  => [
+        'appId'     => '',
+        'appSecret' => ''
+    ],
+    'poll_resource_path' => realpath(__DIR__ . '/../../.tmp/poller/'),
+];

@@ -1,12 +1,18 @@
 /vendor/
+/bower_components/
 /logs/*
 !/logs/README.md
 README.md
 propel.xml
 generated-conf/config.php
+/cache
+app/config/settings.php
 
 <!-- Idea -->
 .idea
 
 <!-- Vagrant -->
 .vagrant
+Vagrantfile
+config.yaml
+setup.rb

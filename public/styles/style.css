@@ -1,0 +1,85 @@
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* Modal */
+.modal {
+    padding: 25px;
+}
+
+/* Header */
+.form-header {
+
+}
+    .form-header > div {
+        justify-content: center;
+        align-items: center;
+        display: flex;
+    }
+        .form-header > div > h1 {
+            margin: 0 !important;
+        }
+        .form-header > div > img {
+            width: 125px;
+            height: 125px;
+        }
+
+/* Panel */
+div#progress {
+    display: none;
+}
+    div > .progress {
+        height: 10px;
+        background-color: #f0f0f0;
+    }
+        div > .progress > .bar {
+            background-color: #3273dc;
+            width: 0;
+            height: 100%;
+            transition: width ease-out 0.5s;
+        }
+
+div#tips {
+    display: none;
+}
+
+/* Tabs over panel */
+.card > .tabs {
+    margin-bottom: 0;
+}
+
+.card #validate {
+    display: none;
+}
+
+#result {
+    display: none;
+}
+    #result > table {
+        margin-bottom: 10px;
+        table-layout: fixed;
+    }
+        #result > table > tbody > tr:hover,
+        #result > table > tbody > tr:focus {
+            background-color: transparent;
+        }
+
+/* Helpers */
+.has-margin-auto {
+    margin: auto;
+}
+
+.break-word {
+    word-wrap: break-word;
+}
+
+.button-expanded {
+    width: 100%;
+}
+
+.text-center {
+    text-align: center;
+}

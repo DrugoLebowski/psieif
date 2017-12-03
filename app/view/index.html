@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title>Facebook Cybersecurity</title>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/7.0.0/normalize.min.css" rel="stylesheet" />
+        <link href='//fonts.googleapis.com/css?family=Lato:300' rel='stylesheet' type='text/css'>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.4.3/css/bulma.css" rel="stylesheet" />
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" >
+        <link href="styles/style.css" rel="stylesheet" />
+    </head>
+    <body>
+        <div id="modal" class="modal">
+            <div class="modal-background"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <h4 class="modal-card-title" id="modal-title-content"></h4>
+                    <a class="delete" rel="modal:close"></a>
+                </header>
+                <section class="modal-card-body">
+                    <p id="modal-text-content"></p>
+                </section>
+                <footer class="modal-card-foot">
+                    <button type="button" class="button is-default" id="modal-button"></button>
+                </footer>
+            </div>
+        </div><!-- /.modal -->
+
+        <div id="modal-log" class="modal">
+            <div class="modal-background"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <h4 class="modal-card-title" id="modal-login-title">Login</h4>
+                    <a class="delete" rel="modal:close"></a>
+                </header>
+                <section class="modal-card-body">
+                    <div class="text-center">
+                        <p>
+                            Processors view from advices like photonic kahlesses.
+                        </p>
+                        <div id="fb-login-button" class="fb-login-button" data-max-rows="1"
+                             data-size="large" data-button-type="continue_with"
+                             data-show-faces="false" data-auto-logout-link="false"
+                             data-use-continue-as="false" onlogin="Facebook.checkLoginState();" scope="email">
+                        </div>
+                    </div>
+                </section>
+                <footer class="modal-card-foot">
+
+                </footer>
+            </div>
+        </div><!-- /.modal -->
+        <div class="section">
+            <div class="container form-header">
+                <div class="column content is-6 is-offset-3">
+                    <img src="/images/esagono-facebook.png"/>
+                    <h1>Facebook Cybersecurity</h1>
+                </div>
+            </div>
+            <div class="container">
+                <div class="column is-6 is-offset-3">
+                    <div class="card">
+                        <div class="tabs is-centered">
+                            <ul>
+                                <li class="is-active">
+                                    <a id="a-hasher">Hash a post</a>
+                                </li>
+                                <li>
+                                    <a id="a-validate">Validate a post</a>
+                                </li>
+                            </ul>
+                        </div> <!-- Tabs -->
+                        <div class="card-content tab-content">
+                            <div id="hasher" class="container-fluid fade">
+                                <div class="content">
+                                    <div class="field">
+                                        <label class="label" for="link">URL to resource</label>
+                                    </div>
+                                    <div class="field has-addons">
+                                        <div class="control">
+                                            <button id="checkBtn" class="button is-default" type="button">Hash!</button>
+                                        </div>
+                                        <div class="control has-icons-right is-expanded">
+                                            <input id="link" type="text" class="input is-default"
+                                                   placeholder="URL to resource" required>
+                                            <span class="icon is-medium is-right">
+                                                <i id="linkIcon" class="fa"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div id="tips" class="help is-danger">
+                                        <div>The link must be as the following examples:
+                                            <ul>
+                                                <li>https://www.facebook.com/xxxx/posts/0000000000</li>
+                                                <li>https://www.facebook.com/xxxx/videos/0000000000</li>
+                                                <li>https://www.facebook.com/xxxx/photos/a.0000.0000/00000</li>
+                                                <li>https://www.facebook.com/permalink.php?story_fbid=0000&id=0000</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="progress">
+                                    <h5>Progress... <span class="complete" style="display: none;">Complete!</span> </h5>
+                                    <div class="progress is-primary">
+                                        <div class="bar"></div>
+                                    </div>
+                                </div>
+                                <div id="result">
+                                    <table class="table">
+                                        <thead>
+                                        <tr class="is-selected">
+                                            <td colspan="2">
+                                                Result
+                                            </td>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+                                            <td>Creation date:</td>
+                                            <td><span id="result_creation-date"></span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Owner:</td>
+                                            <td class="break-word"><span id="result_owner"></span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Code:</td>
+                                            <td><span id="result_code"></span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Sha-256 Hash:</td>
+                                            <td class="break-word"><span id="result_hash"></span></td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                    <a href="#" target="_blank" class="button is-primary button-expanded" id="result_download">
+                                        <h4 class="text-center no-margin">Download!</h4>
+                                    </a>
+                                </div>
+                            </div> <!-- Hasher -->
+                            <div id="validate" class="container-fluid fade">
+                                <div class="field">
+                                    <label class="label" for="code">Code of the resource</label>
+                                    <div class="control">
+                                        <input id="code" type="text" class="input"
+                                               placeholder="Code of the resource" required>
+                                        <span class="glyphicon form-control-feedback"></span>
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <label class="label" for="hash">Hash of the resource</label>
+                                    <div class="control">
+                                        <input id="hash" type="text" class="input"
+                                               placeholder="Hash of the resource" required />
+                                        <span class="glyphicon form-control-feedback"></span>
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <button id="validateBtn" class="button is-info button-expanded">Check!</button>
+                                </div>
+                            </div> <!-- Validate -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script charset="utf-8" type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+        <script charset="utf-8" type="text/javascript" src="js/jquery.modal.js"></script>
+        <script charset="utf-8" type="text/javascript" src="js/md5.min.js"></script>
+        <script charset="utf-8" type="text/javascript" src="js/Cookies.js"></script>
+        <script charset="utf-8" type="text/javascript" src="js/Facebook.js"></script>
+        <script charset="utf-8" type="text/javascript" src="js/App.js"></script>
+    </body>
+</html>
